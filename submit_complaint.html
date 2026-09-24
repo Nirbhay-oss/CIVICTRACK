@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card narrow">
+    <h2>Report a Civic Issue</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Category</label>
+        <select name="category" required>
+            {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Ward</label>
+        <select name="ward" required>
+            {% for w in wards %}
+                <option value="{{ w }}">{{ w }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Description</label>
+        <textarea name="description" rows="4" required placeholder="Describe the issue in detail..."></textarea>
+
+        <label>Photo (optional)</label>
+        <input type="file" name="photo" accept=".jpg,.jpeg,.png">
+
+        <label>Location (optional, but helps it show up on the public map)</label>
+        <button type="button" id="locate-btn" class="btn">📍 Use My Current Location</button>
+        <p id="locate-status" class="hint"></p>
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
+        <button type="submit">Submit Complaint</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('locate-btn').addEventListener('click', function () {
+    const status = document.getElementById('locate-status');
+    if (!navigator.geolocation) {
+        status.textContent = "Your browser doesn't support location.";
+        return;
+    }
+    status.textContent = "Getting your location...";
+    navigator.geolocation.getCurrentPosition(function (pos) {
+        document.getElementById('latitude').value = pos.coords.latitude;
+        document.getElementById('longitude').value = pos.coords.longitude;
+        status.textContent = "Location captured ✅ (" + pos.coords.latitude.toFixed(4) + ", " + pos.coords.longitude.toFixed(4) + ")";
+    }, function (err) {
+        status.textContent = "Could not get location: " + err.message;
+    });
+});
+</script>
+{% endblock %}

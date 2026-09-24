@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <h2>My Complaints</h2>
+    <a class="btn" href="{{ url_for('submit_complaint') }}">+ Report New Issue</a>
+</div>
+
+{% if complaints|length == 0 %}
+    <p>You haven't reported anything yet. Click "Report New Issue" to get started.</p>
+{% else %}
+<table>
+    <tr>
+        <th>ID</th><th>Category</th><th>Department</th><th>Ward</th><th>Status</th><th>Days Open</th><th></th>
+    </tr>
+    {% for c in complaints %}
+    <tr>
+        <td>#{{ c['id'] }}</td>
+        <td>{{ c['category'] }}</td>
+        <td>{{ c['department'] }}</td>
+        <td>{{ c['ward'] }}</td>
+        <td>
+            <span class="badge status-{{ c['status']|replace(' ', '-')|replace('(', '')|replace(')', '') }}">{{ c['status'] }}</span>
+            {% if c['escalated'] %}<span class="badge status-Escalated">🚩 Escalated</span>{% endif %}
+        </td>
+        <td>{{ days_open(c['created_at']) }} / {{ sla_limit_for(c['category']) }} day SLA</td>
+        <td><a href="{{ url_for('complaint_detail', complaint_id=c['id']) }}">View</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+    <h2>⚠️ Similar Complaint(s) Already Exist</h2>
+    <p>We found {{ duplicates|length }} open complaint(s) for the same category in the same ward.
+       Reporting again splits attention across duplicates - if this is the same issue,
+       consider just checking the existing one instead.</p>
+
+    <table>
+        <tr><th>ID</th><th>Description</th><th>Status</th><th>Reported On</th><th></th></tr>
+        {% for d in duplicates %}
+        <tr>
+            <td>#{{ d['id'] }}</td>
+            <td>{{ d['description'][:70] }}{% if d['description']|length > 70 %}...{% endif %}</td>
+            <td><span class="badge status-{{ d['status']|replace(' ', '-')|replace('(', '')|replace(')', '') }}">{{ d['status'] }}</span></td>
+            <td>{{ d['created_at'] }}</td>
+            <td><a href="{{ url_for('complaint_detail', complaint_id=d['id']) }}">View</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div style="margin-top:20px;">
+        <a href="{{ url_for('citizen_dashboard') }}" class="btn">Go to My Dashboard</a>
+
+        <form method="POST" action="{{ url_for('submit_complaint') }}" style="display:inline;">
+            <input type="hidden" name="category" value="{{ form_data['category'] }}">
+            <input type="hidden" name="ward" value="{{ form_data['ward'] }}">
+            <input type="hidden" name="description" value="{{ form_data['description'] }}">
+            <input type="hidden" name="latitude" value="{{ form_data.get('latitude', '') }}">
+            <input type="hidden" name="longitude" value="{{ form_data.get('longitude', '') }}">
+            <input type="hidden" name="confirm_new" value="1">
+            <button type="submit" class="btn btn-red">This is a different issue — Submit Anyway</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

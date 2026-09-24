@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Public Complaint Map — Bengaluru</h2>
+<p class="hint">Every citizen can see what's been reported and its current status. This is the
+"transparency" side of CivicTrack — problems aren't just filed into a private queue.</p>
+
+<div id="map" style="height: 500px; border-radius: 10px; margin-top: 10px;"></div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+    // Bengaluru's approximate center coordinates
+    const map = L.map('map').setView([12.9716, 77.5946], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const statusColors = {
+        'Submitted': '#f9a825',
+        'In Progress': '#1565c0',
+        'Resolved (Awaiting Verification)': '#6a1b9a',
+        'Closed': '#2e7d32',
+        'Reopened': '#c62828'
+    };
+
+    const points = {{ points|tojson }};
+
+    if (points.length === 0) {
+        document.getElementById('map').insertAdjacentHTML('afterend',
+            '<p class="hint">No located complaints yet — submit one with "Use My Current Location" to see it appear here.</p>');
+    }
+
+    points.forEach(function (p) {
+        const color = statusColors[p.status] || '#555';
+        const marker = L.circleMarker([p.latitude, p.longitude], {
+            radius: 9,
+            fillColor: color,
+            color: '#fff',
+            weight: 2,
+            fillOpacity: 0.9
+        }).addTo(map);
+
+        marker.bindPopup(
+            '<strong>#' + p.id + ' — ' + p.category + '</strong><br>' +
+            'Ward: ' + p.ward + '<br>' +
+            'Department: ' + p.department + '<br>' +
+            'Status: ' + p.status + '<br>' +
+            '<a href="/complaint/' + p.id + '">View details</a>'
+        );
+    });
+</script>
+{% endblock %}

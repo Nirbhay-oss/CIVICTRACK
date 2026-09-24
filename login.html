@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card narrow">
+    <h2>Login</h2>
+    <form method="POST">
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Password</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p class="hint">
+        New citizen? <a href="{{ url_for('register') }}">Register here</a>
+    </p>
+
+    <div class="demo-box">
+        <strong>Demo accounts (for testing officer/admin views):</strong>
+        <ul>
+            <li>Roads officer: officer_roads@civictrack.com / officer123</li>
+            <li>Sanitation officer: officer_sanitation@civictrack.com / officer123</li>
+            <li>BESCOM officer: officer_bescom@civictrack.com / officer123</li>
+            <li>BWSSB officer: officer_bwssb@civictrack.com / officer123</li>
+            <li>Admin: admin@civictrack.com / admin123</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

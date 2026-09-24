@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Officer Dashboard — {{ department }}</h2>
+
+{% if complaints|length == 0 %}
+    <p>No complaints assigned to your department yet.</p>
+{% else %}
+<table>
+    <tr>
+        <th>ID</th><th>Category</th><th>Ward</th><th>Description</th><th>Status / SLA</th><th>Update</th>
+    </tr>
+    {% for c in complaints %}
+    <tr>
+        <td>#{{ c['id'] }}</td>
+        <td>{{ c['category'] }}</td>
+        <td>{{ c['ward'] }}</td>
+        <td>{{ c['description'][:60] }}{% if c['description']|length > 60 %}...{% endif %}
+            <br><a href="{{ url_for('complaint_detail', complaint_id=c['id']) }}">View full / photo</a>
+        </td>
+        <td>
+            <span class="badge status-{{ c['status']|replace(' ', '-')|replace('(', '')|replace(')', '') }}">{{ c['status'] }}</span>
+            {% if c['escalated'] %}<br><span class="badge status-Escalated">🚩 Escalated ({{ days_open(c['created_at']) }}d, SLA {{ sla_limit_for(c['category']) }}d)</span>{% endif %}
+        </td>
+        <td>
+            <form method="POST" action="{{ url_for('update_complaint', complaint_id=c['id']) }}" enctype="multipart/form-data" class="inline-form">
+                <select name="status">
+                    <option value="Submitted" {% if c['status']=='Submitted' %}selected{% endif %}>Submitted</option>
+                    <option value="In Progress" {% if c['status']=='In Progress' %}selected{% endif %}>In Progress</option>
+                    <option value="Resolved (Awaiting Verification)" {% if c['status']=='Resolved (Awaiting Verification)' %}selected{% endif %}>Resolved (send for verification)</option>
+                </select>
+                <input type="text" name="remark" placeholder="Remark...">
+                <input type="file" name="proof" accept=".jpg,.jpeg,.png">
+                <button type="submit">Update</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

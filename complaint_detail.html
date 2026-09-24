@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+    <h2>Complaint #{{ c['id'] }}</h2>
+    <p><strong>Category:</strong> {{ c['category'] }}</p>
+    <p><strong>Routed to:</strong> {{ c['department'] }}</p>
+    <p><strong>Ward:</strong> {{ c['ward'] }}</p>
+    <p><strong>Status:</strong> <span class="badge status-{{ c['status']|replace(' ', '-')|replace('(', '')|replace(')', '') }}">{{ c['status'] }}</span></p>
+    <p><strong>Description:</strong> {{ c['description'] }}</p>
+
+    {% if c['photo_filename'] %}
+        <p><strong>Citizen's Photo:</strong></p>
+        <img class="evidence" src="{{ url_for('static', filename='uploads/' + c['photo_filename']) }}">
+    {% endif %}
+
+    <hr>
+
+    <p><strong>Officer Remark:</strong> {{ c['officer_remark'] or 'No update yet.' }}</p>
+    {% if c['proof_filename'] %}
+        <p><strong>Proof of Work:</strong></p>
+        <img class="evidence" src="{{ url_for('static', filename='uploads/' + c['proof_filename']) }}">
+    {% endif %}
+
+    <p class="hint">Last updated: {{ c['updated_at'] }}</p>
+
+    {% if session.get('role') == 'citizen' and c['status'] == 'Resolved (Awaiting Verification)' %}
+    <div class="verify-box">
+        <p><strong>The department marked this as resolved. Is the issue actually fixed?</strong></p>
+        <form method="POST" action="{{ url_for('verify_complaint', complaint_id=c['id']) }}" style="display:inline;">
+            <input type="hidden" name="action" value="confirm">
+            <button type="submit" class="btn btn-green">✅ Yes, it's fixed</button>
+        </form>
+        <form method="POST" action="{{ url_for('verify_complaint', complaint_id=c['id']) }}" style="display:inline;">
+            <input type="hidden" name="action" value="reopen">
+            <button type="submit" class="btn btn-red">❌ No, reopen it</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('home') }}" class="hint">← Back</a>
+</div>
+{% endblock %}

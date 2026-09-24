@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<div class="stats-grid">
+    {% for status, count in stats.items() %}
+    <div class="stat-card">
+        <div class="stat-number">{{ count }}</div>
+        <div class="stat-label">{{ status }}</div>
+    </div>
+    {% endfor %}
+    <div class="stat-card" style="border: 2px solid #c62828;">
+        <div class="stat-number" style="color:#c62828;">{{ escalated_count }}</div>
+        <div class="stat-label">🚩 Escalated (SLA breached)</div>
+    </div>
+</div>
+
+<h3>Department Load</h3>
+<table>
+    <tr><th>Department</th><th>Total Complaints</th><th>Pending</th><th>Escalated</th></tr>
+    {% for d in dept_stats %}
+    <tr>
+        <td>{{ d['department'] }}</td>
+        <td>{{ d['total'] }}</td>
+        <td>{{ d['pending'] }}</td>
+        <td>{{ d['escalated'] or 0 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>All Complaints</h3>
+<table>
+    <tr><th>ID</th><th>Category</th><th>Department</th><th>Ward</th><th>Status</th><th>Updated</th><th>Reassign</th><th></th></tr>
+    {% for c in complaints %}
+    <tr>
+        <td>#{{ c['id'] }}</td>
+        <td>{{ c['category'] }}</td>
+        <td>{{ c['department'] }}</td>
+        <td>{{ c['ward'] }}</td>
+        <td>
+            <span class="badge status-{{ c['status']|replace(' ', '-')|replace('(', '')|replace(')', '') }}">{{ c['status'] }}</span>
+            {% if c['escalated'] %}<br><span class="badge status-Escalated">🚩 Escalated</span>{% endif %}
+        </td>
+        <td>{{ c['updated_at'] }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('reassign_complaint', complaint_id=c['id']) }}" class="inline-form">
+                <select name="department">
+                    {% for dept in all_departments %}
+                        <option value="{{ dept }}" {% if dept == c['department'] %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Reassign</button>
+            </form>
+        </td>
+        <td><a href="{{ url_for('complaint_detail', complaint_id=c['id']) }}">View</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
